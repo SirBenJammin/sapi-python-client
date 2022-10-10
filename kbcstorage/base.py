@@ -68,9 +68,11 @@ class Endpoint:
         headers = kwargs.pop('headers', {})
         headers.update(self._auth_header)
 
-        r = requests.get(url, params, headers=headers, **kwargs)
+        r = requests.get(url, params, headers=headers, timeout=240, **kwargs)
         try:
             r.raise_for_status()
+        except requests.exceptions.Timeout:
+            raise
         except requests.HTTPError:
             # Handle different error codes
             raise
@@ -113,9 +115,11 @@ class Endpoint:
         """
         headers = kwargs.pop('headers', {})
         headers.update(self._auth_header)
-        r = requests.post(headers=headers, *args, **kwargs)
+        r = requests.post(headers=headers, timeout=1800, *args, **kwargs)
         try:
             r.raise_for_status()
+        except requests.exceptions.Timeout:
+            raise
         except requests.HTTPError:
             # Handle different error codes
             raise
@@ -139,9 +143,152 @@ class Endpoint:
         """
         headers = kwargs.pop('headers', {})
         headers.update(self._auth_header)
-        r = requests.delete(headers=headers, *args, **kwargs)
+        r = requests.delete(headers=headers, timeout=240, *args, **kwargs)
         try:
             r.raise_for_status()
+        except requests.exceptions.Timeout:
+            raise
+        except requests.HTTPError:
+            # Handle different error codes
+            raise
+        # Should delete return something on success?
+
+
+class Orchestration_Endpoint:
+    """
+    Base class for implementing a single endpoint related to a single entities
+    as described in the Orchestrator API.
+
+    Attributes:
+        base_url (str): The base URL for this endpoint.
+        token (str): A key for the Orchestrator API.
+    """
+    def __init__(self, root_url, path_component, token):
+        """
+        Create an endpoint.
+
+        Args
+            root_url (str): Root url of API. eg.
+                "https://connection.keboola.com/"
+            path_component (str): The section of the path specific to the
+                endpoint. eg. "buckets"
+            token (str): A key for the Orchestrator API. Can be found in the Orchestrator
+                console.
+        """
+        if not root_url:
+            raise ValueError("Root URL is required.")
+        if not path_component:
+            raise ValueError("Path component is required.")
+        if not token:
+            raise ValueError("Token is required.")
+        self.root_url = root_url
+        self.base_url = '{}/orchestrator/{}'.format(root_url.strip('/'), path_component.strip('/'))
+        self.token = token
+        self._auth_header = {'X-StorageApi-Token': self.token,
+                             'Accept-Encoding': 'gzip',
+                             'User-Agent': 'Keboola Storage API Python Client'}
+
+    def _get_raw(self, url, params=None, **kwargs):
+        """
+        Construct a requests GET call with args and kwargs and process the
+        results.
+
+
+        Args:
+            url (str): requested url
+            params (dict): additional url params to be passed to the underlying
+                requests.get
+            **kwargs: Key word arguments to pass to the get requests.get
+
+        Returns:
+            r (requests.Response): object
+
+        Raises:
+            requests.HTTPError: If the API request fails.
+        """
+        headers = kwargs.pop('headers', {})
+        headers.update(self._auth_header)
+
+        r = requests.get(url, params, headers=headers, timeout=240, **kwargs)
+        try:
+            r.raise_for_status()
+        except requests.exceptions.Timeout:
+            raise
+        except requests.HTTPError:
+            # Handle different error codes
+            raise
+        else:
+            return r
+
+    def _get(self, url, params=None, **kwargs):
+        """
+        Make authenticated GET request and return json
+
+        Args:
+            url (str): requested url
+            params (dict): additional url params to be passed to the underlying
+                requests.get
+            **kwargs: Key word arguments to pass to the get requests.get
+
+        Returns:
+           body: Response body parsed from json.
+
+        Raises:
+            requests.HTTPError: If the API request fails.
+
+        """
+        return self._get_raw(url, params, **kwargs).json()
+
+    def _post(self, *args, **kwargs):
+        """
+        Construct a requests POST call with args and kwargs and process the
+        results.
+
+        Args:
+            *args: Positional arguments to pass to the post request.
+            **kwargs: Key word arguments to pass to the post request.
+
+        Returns:
+            body: Response body parsed from json.
+
+        Raises:
+            requests.HTTPError: If the API request fails.
+        """
+        headers = kwargs.pop('headers', {})
+        headers.update(self._auth_header)
+        r = requests.post(headers=headers, timeout=1800, *args, **kwargs)
+        try:
+            r.raise_for_status()
+        except requests.exceptions.Timeout:
+            raise
+        except requests.HTTPError:
+            # Handle different error codes
+            raise
+        else:
+            return r.json()
+
+    def _delete(self, *args, **kwargs):
+        """
+        Construct a requests DELETE call with args and kwargs and process the
+        result
+
+        Args:
+            *args: Positional arguments to pass to the delete request.
+            **kwargs: Key word arguments to pass to the delete request.
+
+        Returns:
+            body: Response body parsed from json.
+
+        Raises:
+            requests.HTTPError: If the API request fails.
+        """
+        headers = kwargs.pop('headers', {})
+        headers.update(self._auth_header)
+        r = requests.delete(headers=headers, timeout=240, *args, **kwargs)
+        try:
+            r.raise_for_status()
+        except requests.exceptions.Timeout:
+            raise
         except requests.HTTPError:
             # Handle different error codes
             raise
