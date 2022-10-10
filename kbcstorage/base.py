@@ -163,26 +163,22 @@ class Orchestration_Endpoint:
         base_url (str): The base URL for this endpoint.
         token (str): A key for the Orchestrator API.
     """
-    def __init__(self, root_url, path_component, token):
+    def __init__(self, root_url, token):
         """
         Create an endpoint.
 
         Args
             root_url (str): Root url of API. eg.
                 "https://connection.keboola.com/"
-            path_component (str): The section of the path specific to the
-                endpoint. eg. "buckets"
             token (str): A key for the Orchestrator API. Can be found in the Orchestrator
                 console.
         """
         if not root_url:
             raise ValueError("Root URL is required.")
-        if not path_component:
-            raise ValueError("Path component is required.")
         if not token:
             raise ValueError("Token is required.")
         self.root_url = root_url
-        self.base_url = '{}/orchestrator/{}'.format(root_url.strip('/'), path_component.strip('/'))
+        self.base_url = '{}/orchestrator'.format(root_url.strip('/'))
         self.token = token
         self._auth_header = {'X-StorageApi-Token': self.token,
                              'Accept-Encoding': 'gzip',

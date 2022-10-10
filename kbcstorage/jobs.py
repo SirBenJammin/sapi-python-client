@@ -113,7 +113,7 @@ class Jobs(Endpoint):
         """
         retries = 1
         while True:
-            job = self.detail(job_id)
+            job = self.detail(job_id=job_id)
             if job['status'] in ('error', 'success'):
                 return job
             retries += 1
@@ -167,7 +167,7 @@ class Orchestration_Jobs(Orchestration_Endpoint):
             root_url (:obj:`str`): The base url for the API.
             token (:obj:`str`): A storage API key.
         """
-        super().__init__(root_url, 'run', token)
+        super().__init__(root_url, token)
 
     def run(self, configuration_id):
         """
@@ -183,7 +183,9 @@ class Orchestration_Jobs(Orchestration_Endpoint):
             'config': configuration_id
         }
 
-        return self._post(self.base_url, data=body)
+        run_url = '{}/{}'.format(self.base_url, "run")
+
+        return self._post(run_url, json=body)
 
     def detail(self, job_id):
         """
@@ -195,9 +197,9 @@ class Orchestration_Jobs(Orchestration_Endpoint):
         Raises:
             requests.HTTPError: If the API request fails.
         """
-        url = '{}/{}'.format(self.base_url, job_id)
+        job_url = '{}/{}/{}'.format(self.base_url, "jobs", job_id)
 
-        return self._get(url)
+        return self._get(job_url)
 
     def status(self, job_id):
         """
