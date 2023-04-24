@@ -288,4 +288,6 @@ class Orchestration_Endpoint:
         except requests.HTTPError:
             # Handle different error codes
             raise
-        # Should delete return something on success?
+
+        if 'application/json' in r.headers.get('Content-Type', ''):
+            return r.json()
