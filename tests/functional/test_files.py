@@ -1,17 +1,16 @@
 import csv
 import os
-import unittest
 import tempfile
 import warnings
 import time
 from requests import exceptions
-
 from kbcstorage.buckets import Buckets
 from kbcstorage.files import Files
 from kbcstorage.tables import Tables
+from tests.base_test_case import BaseTestCase
 
 
-class TestFiles(unittest.TestCase):
+class TestEndpoint(BaseTestCase):
     def setUp(self):
         # timeout for files from previous tests to appear
         time.sleep(1)
@@ -101,7 +100,7 @@ class TestFiles(unittest.TestCase):
         with self.subTest():
             self.assertEqual(file_id, file_info['id'])
         with self.subTest():
-            self.assertTrue(file_info['provider'] in ['aws', 'azure'])
+            self.assertTrue(file_info['provider'] in ['aws', 'azure', 'gcp'])
         if file_info['provider'] == 'aws':
             with self.subTest():
                 self.assertTrue('credentials' in file_info)

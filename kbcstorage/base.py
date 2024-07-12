@@ -35,8 +35,6 @@ class Endpoint:
         """
         if not root_url:
             raise ValueError("Root URL is required.")
-        if not path_component:
-            raise ValueError("Path component is required.")
         if not token:
             raise ValueError("Token is required.")
         self.root_url = root_url
@@ -120,6 +118,32 @@ class Endpoint:
             r.raise_for_status()
         except requests.exceptions.Timeout:
             raise
+        except requests.HTTPError:
+            # Handle different error codes
+            raise
+        else:
+            return r.json()
+
+    def _put(self, *args, **kwargs):
+        """
+        Construct a requests PUT call with args and kwargs and process the
+        results.
+
+        Args:
+            *args: Positional arguments to pass to the post request.
+            **kwargs: Key word arguments to pass to the post request.
+
+        Returns:
+            body: Response body parsed from json.
+
+        Raises:
+            requests.HTTPError: If the API request fails.
+        """
+        headers = kwargs.pop('headers', {})
+        headers.update(self._auth_header)
+        r = requests.put(headers=headers, *args, **kwargs)
+        try:
+            r.raise_for_status()
         except requests.HTTPError:
             # Handle different error codes
             raise
