@@ -21,13 +21,13 @@ classifiers = [
 dependencies = [
     "boto3",
     "azure-storage-blob",
-    "urllib3<2.0.0",  # Frozen until fixed: https://github.com/boto/botocore/issues/2926
+    "urllib3",
     # Dev dependencies
     "requests",
     "responses",
     "python-dotenv",
-    "google-cloud-storage==2.16.0",
-    "google-auth==2.29.0"
+    "google-cloud-storage",
+    "google-auth"
 ]
 dynamic = ["version"]
 
